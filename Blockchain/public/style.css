@@ -1,10 +1,60 @@
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
-    text-align: center;
-    padding: 50px;
+* {
+    box-sizing: border-box;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
 }
 
-h1 {
-    color: #333;
+body {
+    background-color: #5c5c61;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 800px;
+    width: 100%;
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    text-align: center;
+}   
+
+.section {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #f9f9fb;
+    border-radius: 5px;
+}
+
+input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+    border: 1px solid #ddd;
+}
+
+button {
+    width: 100%;
+    padding: 8px;
+    color: #ffffff;
+    background-color: #7d09db;
+    border: none;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color:  #290447;
+}
+
+.certificate-info, .certificates-list {
+    text-align: left;
+    margin-top: 15px;
+    padding: 10px;
+    border-top: 1px solid #ddd;
+}
+
+.certificates-list p {
+    margin: 5px 0;
 }

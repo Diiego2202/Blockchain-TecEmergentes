@@ -1,36 +1,113 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meu Projeto</title>
     <link rel="stylesheet" href="style.css">
+    <title>Certificado Blockchain</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Trabalho Blockchain</h1>
+
+        <div class="section">
+            <h2>Certificados</h2>
+            <button onclick="loadCertificates()">Atualizar</button>
+            <div id="certificates-list" class="certificates-list"></div>
+        </div>
+
+        <div class="section">
+            <h2>Registrar Certificado</h2>
+            <input type="text" id="register-id" placeholder="ID do Certificado">
+            <input type="text" id="register-name" placeholder="Nome do Aluno">
+            <input type="text" id="register-course" placeholder="Curso">
+            <input type="text" id="register-issueDate" placeholder="Data de Emissão">
+            <button onclick="registerCertificate()">Registrar</button>
+        </div>
+
+        <div class="section">
+            <h2>Pesquisar Certificado</h2>
+            <input type="text" id="get-id" placeholder="ID do Certificado">
+            <button onclick="getCertificate()">Pesquisar</button>
+            <div id="certificate-info" class="certificate-info"></div>
+        </div>
+
+        <div class="section">
+            <h2>Revogar Certificado</h2>
+            <input type="text" id="revoke-id" placeholder="ID do Certificado">
+            <button onclick="revokeCertificate()">Revogar</button>
+        </div>
+
+    </div>
+
     <script>
-        async function carregarDados() {
-            try {
-                const response = await fetch('/dados');
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                const dados = await response.json();
-                document.getElementById('nomeOrigem').textContent = dados.nomeOrigem;
-                document.getElementById('nomeDestino').textContent = dados.nomeDestino;
-                document.getElementById('valor').textContent = dados.valor;
-            } catch (error) {
-                console.error('Houve um problema com a requisição Fetch:', error);
+        async function registerCertificate() {
+            const id = document.getElementById('register-id').value;
+            const name = document.getElementById('register-name').value;
+            const course = document.getElementById('register-course').value;
+            const issue_date = document.getElementById('register-issueDate').value;
+
+            const response = await fetch('/certificate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action:'register', id, name, course, issue_date })
+            });
+            const data = await response.json();
+            alert(data.message || data.error);
+            loadCertificates();
+        }
+
+        async function getCertificate() {
+            const id = document.getElementById('get-id').value;
+
+            const response = await fetch('/certificate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'get', id })
+            });
+            const data = await response.json();
+
+            if (data.error) {
+                alert(data.error);
+            } else {
+                document.getElementById('certificate-info').innerHTML = `
+                    <h3>Certificado:</h3>
+                    <p>ID: ${data.id}</p>
+                    <p>Nome do Aluno: ${data.studentName}</p>
+                    <p>Curso: ${data.course}</p>
+                    <p>Data de Emissão: ${data.issueDate}</p>
+                    <p>Válido: ${data.isValid ? "Sim" : "Não"}</p>
+                `;
             }
         }
 
-        // Carregar os dados ao carregar a página
-        window.addEventListener('load', carregarDados);
+        async function revokeCertificate() {
+            const id = document.getElementById('revoke-id').value;
+
+            const response = await fetch('/certificate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'revoke', id })
+            });
+            const data = await response.json();
+            alert(data.message || data.error);
+            loadCertificates();
+        }
+
+        async function loadCertificates() {
+            const response = await fetch('/certificates');
+            const certificates = await response.json();
+
+            const certificatesList = document.getElementById('certificates-list');
+            certificatesList.innerHTML = '<h3>Certificados Registrados</h3>';
+            certificates.forEach(cert => {
+                certificatesList.innerHTML += `
+                    <p>ID: ${cert.id} --> Válido: ${cert.isValid ? "Sim" : "Não"}</p>
+                `;
+            });
+        }
+
+        window.onload = loadCertificates;
     </script>
-</head>
-
-<body>
-    <h1 id="nomeOrigem"></h1>
-    <p id="nomeDestino"></p>
-    <p id="valor"></p>
 </body>
-
 </html>
