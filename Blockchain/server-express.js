@@ -8,6 +8,8 @@ const port = 3000;
 const path = require('path');
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use(express.json());
+
 const provider = new Web3.providers.HttpProvider('http://127.0.0.1:8545');
 const web3 = new Web3(provider);
 
@@ -30,13 +32,16 @@ function stringifyBigInt(obj) {
 
 app.get('/certificates', async (req, res) => {
     try {
-        const certificate_ids = await contrato.methods.getAllCertificateIds().call();
+        const certificate_ids = await contrato.methods.getAll_CertificateIds().call();
         const certificates = await Promise.all(
             certificate_ids.map(async (id) => {
-                const certificate = await contrato.methods.getCertificate(id).call();
+                const certificate = await contrato.methods.get_Certificate(id).call();
                 return {
-                    id: certificate[0].toString(), 
-                    isValid: certificate[4]         
+                    id: certificate[0].toString(),
+                    name: certificate[1],
+                    course: certificate[2],
+                    issue_date: certificate[3],
+                    isValid: certificate[4]        
                 };
             })
         );
@@ -47,16 +52,34 @@ app.get('/certificates', async (req, res) => {
     }
 });
 
+app.get('/certificates/:id', async (req, res) => {
+    try {
+        const id = req.params.id;
+        const certificate = await contrato.methods.get_Certificate(id).call();
+        const result = stringifyBigInt({
+            id: certificate[0],
+            name: certificate[1],
+            course: certificate[2],
+            issue_date: certificate[3],
+            valid: certificate[4]
+        });
+        res.json(result);
+    } catch (error) {
+        console.error("ERRO!! Não foi possível buscar o certificado: ", error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 app.post('/newcertificate', async (req, res) => {
     const { action, id, name, course, issue_date } = req.body;
     const accounts = await web3.eth.getAccounts();
 
     try {
         if (action === 'register') {
-            await contrato.methods.registerCertificate(id, name, course, issue_date).send({ from: accounts[0], gas: 500000 });
+            await contrato.methods.Register_Certificate(id, name, course, issue_date).send({ from: accounts[0], gas: 500000 });
             res.json({ message: 'Certificado registrado com sucesso!' });
         } else if (action === 'get') {
-            const certificate = await contrato.methods.getCertificate(id).call();
+            const certificate = await contrato.methods.get_Certificate(id).call();
             const result = stringifyBigInt({
                 id: certificate[0],
                 name: certificate[1],
@@ -66,7 +89,7 @@ app.post('/newcertificate', async (req, res) => {
             });
             res.json(result);
         } else if (action === 'revoke') {
-            await contrato.methods.revokeCertificate(id).send({ from: accounts[0], gas: 500000 });
+            await contrato.methods.Revoke_Certificate(id).send({ from: accounts[0], gas: 500000 });
             res.json({ message: 'Certificado revogado com sucesso!!' });
         } else {
             res.status(400).json({ error: 'Ação inválida!' });

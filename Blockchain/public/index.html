@@ -18,10 +18,10 @@
 
         <div class="section">
             <h2>Registrar Certificado</h2>
-            <input type="text" id="register-id" placeholder="ID do Certificado">
-            <input type="text" id="register-name" placeholder="Nome do Aluno">
-            <input type="text" id="register-course" placeholder="Curso">
-            <input type="text" id="register-issueDate" placeholder="Data de Emissão">
+            <input type="text" id="id" placeholder="ID do Certificado">
+            <input type="text" id="name" placeholder="Nome do Aluno">
+            <input type="text" id="course" placeholder="Curso">
+            <input type="text" id="issueDate" placeholder="Data de Emissão">
             <button onclick="registerCertificate()">Registrar</button>
         </div>
 
@@ -42,12 +42,12 @@
 
     <script>
         async function registerCertificate() {
-            const id = document.getElementById('register-id').value;
-            const name = document.getElementById('register-name').value;
-            const course = document.getElementById('register-course').value;
-            const issue_date = document.getElementById('register-issueDate').value;
+            const id = document.getElementById('id').value;
+            const name = document.getElementById('name').value;
+            const course = document.getElementById('course').value;
+            const issue_date = document.getElementById('issueDate').value;
 
-            const response = await fetch('/certificate', {
+            const response = await fetch('/newcertificate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ action:'register', id, name, course, issue_date })
@@ -60,10 +60,9 @@
         async function getCertificate() {
             const id = document.getElementById('get-id').value;
 
-            const response = await fetch('/certificate', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'get', id })
+            const response = await fetch(`/certificates/${id}`, {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' }
             });
             const data = await response.json();
 
@@ -73,9 +72,9 @@
                 document.getElementById('certificate-info').innerHTML = `
                     <h3>Certificado:</h3>
                     <p>ID: ${data.id}</p>
-                    <p>Nome do Aluno: ${data.studentName}</p>
+                    <p>Nome do Aluno: ${data.name}</p>
                     <p>Curso: ${data.course}</p>
-                    <p>Data de Emissão: ${data.issueDate}</p>
+                    <p>Data de Emissão: ${data.issue_date}</p>
                     <p>Válido: ${data.isValid ? "Sim" : "Não"}</p>
                 `;
             }
@@ -84,7 +83,7 @@
         async function revokeCertificate() {
             const id = document.getElementById('revoke-id').value;
 
-            const response = await fetch('/certificate', {
+            const response = await fetch('/newcertificate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ action: 'revoke', id })
@@ -102,7 +101,8 @@
             certificatesList.innerHTML = '<h3>Certificados Registrados</h3>';
             certificates.forEach(cert => {
                 certificatesList.innerHTML += `
-                    <p>ID: ${cert.id} --> Válido: ${cert.isValid ? "Sim" : "Não"}</p>
+                    <p>ID: ${cert.id} | Nome: ${cert.name} | Curso: ${cert.course} | Emissão: ${cert.issue_date} | Válido: ${cert.isValid ? "Sim" : "Não"}</p>
+                    <hr>
                 `;
             });
         }
