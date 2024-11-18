@@ -1,3 +1,6 @@
-module.exports = function(_deployer) {
-  // Use deployer to state migration tasks.
+const Certificates = artifacts.require('../contract/Certificates.sol');
+
+module.exports = async function (_deployer) {
+  await _deployer.deploy(Certificates);
+  await Certificates.deployed();
 };
